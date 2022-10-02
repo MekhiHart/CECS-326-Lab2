@@ -25,19 +25,23 @@ int main(int argc, char **argv){
 
 	pid_t cpid = fork(); // sender process
 
-	if (cpid == 0){
-	cout << "Master created a child process with PID " << getpid() << " to execute sender\n";
-	execlp("./sender","cool",NULL);
+
+	char messageID_buffer[10];
+	sprintf(messageID_buffer,"%d", qid);
+
+	if (cpid == 0){ // Sender process
+
+	execlp("./sender",messageID_buffer,NULL);
 	exit(0);
 	}
 
 	cpid = fork();
 
-	if (cpid == 0){ 
-	cout << "Master created a child process with PID " << getpid() << " to execute receiver\n";
+	if (cpid == 0){  // receiver
+	execlp("./receiver",messageID_buffer,NULL);
 	exit(0);
 	}
-	wait(NULL);
+	while(wait(NULL) != -1);
 	msgctl(qid, IPC_RMID,NULL);
 	exit(0);
 }
