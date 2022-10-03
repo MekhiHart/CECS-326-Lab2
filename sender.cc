@@ -19,7 +19,7 @@ int main(int argc, char **argv){
 	int argBuffer;
 	int size = sizeof(buffer) - sizeof(long);
 
-	cout << "\nSender PID " << getpid() << " begins execution" <<  endl;
+	cout << "\nSender, PID " << getpid() << " begins execution" <<  endl;
 	cout << "Sender recieved message queue id " << argv[0] << " through commandline parameter\n";
 
 	cout << "Sender: Please input your message\n";
@@ -29,7 +29,8 @@ int main(int argc, char **argv){
 	cout << buffer.message << endl;
 	sscanf(argv[0], "%d", &argBuffer); // turning qid into an int type
 
-	cout << "Sender Buffer: " << argBuffer << " " <<  argBuffer + 3 << endl;
-	msgsnd(argBuffer, (struct msgbuf *) &buffer, size, 121); // sends message
-	exit(0);
+	//cout << "Sender Buffer: " << argBuffer << " " <<  argBuffer + 3 << endl; // test
+	msgsnd(argBuffer, (struct msgbuf *) &buffer, size, 121); // appends user input message into message queue
+	cout << "Message sent to message queue" << endl;
+	exit(0); // terminates program after message has been successfully sent
 }

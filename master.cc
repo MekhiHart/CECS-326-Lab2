@@ -20,28 +20,36 @@ int main(int argc, char **argv){
 		long mtype;
 		char greeting[50];
 	};
-	int qid = msgget(IPC_PRIVATE, IPC_EXCL|IPC_CREAT|0600);
+
 	cout << "Master, PID " << getpid() << ",begins execution" << endl;
+	int qid = msgget(IPC_PRIVATE, IPC_EXCL|IPC_CREAT|0666); // new message queue is located as the queue identifier
 
-	pid_t cpid = fork(); // sender process
-
+	cout << "Master acquired a message queue, id " << qid << endl;
+	pid_t cpid = fork(); // creates sender process
+	
 
 	char messageID_buffer[10];
-	sprintf(messageID_buffer,"%d", qid);
+	sprintf(messageID_buffer,"%d", qid); // turning queue identifier into an int type
 
 	if (cpid == 0){ // Sender process
+	cout << "Master created a child process with PID: " << getpid() << " to execute sender" << endl;
+	execlp("./sender",messageID_buffer,NULL); // loads sender binary file into memory and replacing current process image
 
-	execlp("./sender",messageID_buffer,NULL);
-	exit(0);
+	exit(0); // terminated process
 	}
 
-	cpid = fork();
+	cpid = fork(); // creates new child process for receiver process
 
 	if (cpid == 0){  // receiver
-	execlp("./receiver",messageID_buffer,NULL);
-	exit(0);
+	cout << "Master created a child process with PID: " << getpid() << " to execute receiver" << endl;
+	execlp("./receiver",messageID_buffer,NULL); // loads receiver binary file into memory and replacing current process image
+	exit(0); // terminates process
 	}
-	while(wait(NULL) != -1);
-	msgctl(qid, IPC_RMID,NULL);
-	exit(0);
+
+	cout << "Master waits for both child process to terminate" << endl;
+	while(wait(NULL) != -1); // blocks code after it when all child processes has terminated
+	msgctl(qid, IPC_RMID,NULL); // removes message queue with the IPC_RMID argument
+	cout << "Master received termination signals from both child processes, removed message queue, and terminates\n";
+
+	exit(0); // terminated master process
 }
